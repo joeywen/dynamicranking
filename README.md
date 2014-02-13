@@ -9,18 +9,19 @@ ccb35@cornell.edu, jeb369@cornell.edu
 1  Introduction
 =====
 
-Most queries issued to a search engine are ambiguous at some level. This presents the search engine with a dilemma. On the one hand, if it focuses on the most likely interpretation of the query, it does not provide any utility to users that had a different intent. On the other hand, if it tries to provides at least one relevant results for all query intents, it will not cover any intent particularly well.
-Dynamic Ranking is a retrieval model that combines these otherwise contradictory goals of result diversification and high coverage. The key idea is to make the result ranking dynamic, allowing limited and well-controllable change based on interactive user feedback. Unlike conventional rankings that remain static after the query was issued, a dynamic ranking allows and anticipates user activity. The paper
-
-C. Brandt, T. Joachims, Yisong Yue, J. Bank, Dynamic Ranked Retrieval, ACM International Conference on Web Search and Data Mining (WSDM), 2011.
-
-develops a decision-theoretic framework to guide the design and evaluation of algorithms for this interactive retrieval setting. Furthermore, it proposes two dynamic ranking algorithms, both of which are computationally efficient. We prove that these algorithms provide retrieval performance that is guaranteed to be at least as good as the optimal static ranking algorithm for a large class of performance measures. In empirical evaluations, dynamic ranking shows substantial improvements in retrieval performance over conventional static rankings.
+Most queries issued to a search engine are ambiguous at some level. This presents the search engine with a dilemma. On the one hand, if it focuses on the most likely interpretation of the query, it does not provide any utility to users that had a different intent. On the other hand, if it tries to provides at least one relevant results for all query intents, it will not cover any intent particularly well.                                                                
+Dynamic Ranking is a retrieval model that combines these otherwise contradictory goals of result diversification and high coverage. The key idea is to make the result ranking dynamic, allowing limited and well-controllable change based on interactive user feedback. Unlike conventional rankings that remain static after the query was issued, a dynamic ranking allows and anticipates user activity. The paper                                                                 
+C. Brandt, T. Joachims, Yisong Yue, J. Bank, Dynamic Ranked Retrieval, ACM International Conference on Web Search and Data Mining (WSDM), 2011.                                                                                               
+develops a decision-theoretic framework to guide the design and evaluation of algorithms for this interactive retrieval setting. Furthermore, it proposes two dynamic ranking algorithms, both of which are computationally efficient. We prove that these algorithms provide retrieval performance that is guaranteed to be at least as good as the optimal static ranking algorithm for a large class of performance measures. In empirical evaluations, dynamic ranking shows substantia
+l improvements in retrieval performance over conventional static rankings.
 
 The software provided on this page is an implementation of the dynamic ranking algorithms proposed in the paper. In particular, the code includes implementations of the dynamic myopic (DM) and dynamic lookahead (DL) algorithms, as well as the static myopic (SM) algorithm as a baseline for comparison. The algorithms are implemented for the performance measures DCG, nDCG, Average Precison, and Precision at k, and it is easy to add other measures. The input data is assumed to be a set of query topics, each of which has several subtopics (or facets) that users search for. Each such subtopic is represented by a different user profile, and has a different set of documents which are relevant to it. The code can then be used to compare the performance of adaptive ranking versus nonadaptive ranking. The complete source code including the data used in the paper can be downloaded from the following URL as a ZIP archive:
  http://download.joachims.org/dynamicranking/current/fk_ddr.zip
 As in the paper, the algorithms have full knowledge of the user profiles, although when interacting with a user, they do not know that user's specific profile. User behavior can be deterministic (a user clicks on any relevant document) or nondeterministic (the user may sometimes refrain from clicking on a relevant document, or click randomly on an irrelevant document). In this case, the full-knowledge algorithm knows whether the user is random, but does not know if a given click is due to relevance or spurious clicks.
 Please direct any questions, comments, or problems to ccb35@cornell.edu.
+
 2  Quick Start: Running an example
+======
 
 All examples can be found in the "examples" directory; both the TREC 06-08 ("Interactive") and TREC 09 ("Web") datasets are provided. The code is implemented in python 3.1; python 3.X is necessary to run it. (if 3.1 is not your default version, you can still install it and run it; for example, as /usr/local/bin/python3.1 < function name > ).
 Before running the code, you need to add the source directory to your path. For example, if you extracted the ZIP archive into your home directory, in a bash shell under linux or windows-cygwin you could use the following command:
@@ -32,6 +33,7 @@ fk_run.py
 This script contains all necessary functions to run an example. Each of the fk_run.py scripts runs 5 functions. The first function call (process_qrels.py) generates input files from the qrel (query relevance) files (found at http://trec.nist.gov/). The other functions generate query events, create paths through rankings using the specified algorithms, and evaluate these paths. This process is described in more depth below.
 
 2.1  Full knowledge interactive (fk interactive)
+===
 
 The directory (fk interactive) contains the interactive (TREC 6-8 Interactive Track) dataset. Input is generated from the included query relevance file, qrels_interactive_full.
 As in the paper, the weight of a profile is proportional to the number of documents relevant to the profile. The fk_run file runs and evaluates with DCG over both DM and SM. By changing the parameter algorithmType in the function call of createPaths, the algorithms utilized to generate the ranking can be altered. In addition, the user can set and change the desired values for nondeterministic user behavior. By changing the values of the variables prClickIfRel,prClickIfNotRel, the probability that the users will click at random can be changed. The parameters for algorithm, utility metric, and nondeterminism are provided to show their syntax, but set at their default values. As in the paper, the probability of a particular subtopic is weighted by the number of documents in the subtopic; this distribution is set in the profile file.
@@ -40,11 +42,13 @@ As in the paper, the weight of a profile is proportional to the number of docume
 As before, fk_run provides an example of running the algorithm using DM and SM with utility metric DCG and deterministic users. Again, the process_qrels file provided can be used to generate the input file from the query relevance file, qrels_clueweb.txt; the format of the qrel file for web is slightly different so note that this function is different than the interactive one.
 Also note that as in the paper, profiles are weighted uniformly rather than, as with the interactive set, the number of documents.
 3  Program Overview
+===
 
 The program has two packages: ranking, which contains the bulk of the program code, and utils, which contains some general utility functions used in the program. The package examples contains all of the input and code necessary to run the program on the web and interactive datasets used in the paper.
 3.1  Input format and parsing input: readInputFl
 
 3.1.1  Input format
+=====
 
 The expected input is a directory of input files, each representing a separate topic, and each topic with a unique topic id. Each topic file must have a unique "topic id", and the file name should be topicId.txt. It is very important for the file name to be the topic id plus the extension .txt.
 The input file for a particular topic contains information about the topic's candidate set of documents (the set of possible documents to be used in the ranking) and the topic's profiles (the set of possible user roles). Each line in the file contains the information for one profile. It contains the topic id, the profile id, the weight of the profile (that is, the relative likelihood of choosing this profile at random; can be set as 1 if all profiles are equally likely), and a subset of documents in the candidate set and their relevance to this particular profile.
@@ -58,6 +62,7 @@ Example: a topic 555, with 3 profiles. Profile 1 has relevant documents d1, d2, 
 555 3 1 d4:1 d5:1
 
 3.1.2  readInputFl.py
+=====
 
 This module contains code to parse the input file and produce the an object which represents a topic's set of profiles and candidate set. It is utilized by createQEvents, createPaths, and evaluatePaths, and does not need to be called directly by a program user.
 3.2  Creating query events: createQEvents
@@ -148,15 +153,18 @@ This function calculates the mean value of each algorithm-generation utility-eva
 
 The utils module contains several general utilities used throughout the program.
 3.5.1  utils.flExts
+=======
 
 Contains a list of the file extensions used to specify each type. As default, the input file extension is '.txt', query events '.qes', paths '.pth', and evaluation files '.eval', but these can be changed by modifying this file.
 3.5.2  utils.utils
+=======
 
 Contains several useful utilities for stripping comments from files, getting a list of files, and deleting temporary files on exit.
 3.5.3  utils.errorWr
 
 Controls output and style of error messages produced by the functions.
 4  Adding New Utility Functions
+======
 
 The current implementation can evaluate using DCG, NDCG, precision, and MAP. To add an additional evaluation metric, only one function needs to be altered: getMetricFunction(metric). Just add a new "elif" statement which returns a reference to a function which takes, as input, the following 3 parameters:
 docsInPath: a list of the docIds of the documents currently in the path
@@ -164,6 +172,7 @@ docsToRels: a dictionary, mapping document ids to the estimated relevances/utili
 cutoff: the length of the ranking
 This function needs to return the estimated utility of the path docsInPath.
 5  Adding New Algorithms
+======
 
 To add and test a new algorithm, modify the getBestDoc() function in createPaths. The getBestDoc() function returns a list of "next best documents" sorted in decreasing order of estimated utility. In the case of SM, it returns a list (of size cutoff) of "best documents" because the utility of a document in SM is independent of documents in previous positions. For DL and DM, however, only one document is returned because the utility of a document is dependent on the documents above. The getBestDoc() function takes as input the following:
 algType: the algorithm to use (SM, DM, DL)
@@ -174,10 +183,12 @@ cutoff: the length of the ranking to produce (used in estimating utilities in DL
 metric the metric to use to calculate, e.g. DCG; this is used for DL.
 To add a new algorithm, just give it a name (e.g. 'myAlg') and add a conditional expression ëlif algType=='myAlg'".
 6  Acknowledgment
+========
 
 This material is based upon work supported by the National Science Foundation under Award IIS-0905467. Any opinions, findings and conclusions or recommendations expressed in this material are those of the author and do not necessarily reflect the views of the National Science Foundation (NSF).
 
 7  References
+=========
 
 C. Brandt, T. Joachims, Yisong Yue, J. Bank, Dynamic Ranked Retrieval, ACM International Conference on Web Search and Data Mining (WSDM), 2011.
 
